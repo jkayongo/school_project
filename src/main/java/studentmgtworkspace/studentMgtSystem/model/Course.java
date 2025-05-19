@@ -15,15 +15,19 @@ public class Course {
     private Integer courseCredit;
     @OneToOne(mappedBy = "course", cascade = CascadeType.ALL)
     private CourseMaterial coursematerial;
+    @ManyToOne
+    @JoinColumn(name = "teacher_id", referencedColumnName = "teacher_id")
+    private Teacher teacher;
 
     public Course() {
 
     }
 
-    public Course(String title, Integer courseCredit, CourseMaterial coursematerial) {
+    public Course(String title, Integer courseCredit, CourseMaterial coursematerial, Teacher teacher) {
         this.title = title;
         this.courseCredit = courseCredit;
         this.coursematerial = coursematerial;
+        this.teacher = teacher;
     }
 
     public Long getCourseId() {
@@ -58,6 +62,14 @@ public class Course {
         this.coursematerial = coursematerial;
     }
 
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+    }
+
     @Override
     public String toString() {
         return "Course{" +
@@ -65,6 +77,7 @@ public class Course {
                 ", title='" + title + '\'' +
                 ", courseCredit=" + courseCredit +
                 ", coursematerial=" + coursematerial +
+                ", teacher=" + teacher +
                 '}';
     }
 }

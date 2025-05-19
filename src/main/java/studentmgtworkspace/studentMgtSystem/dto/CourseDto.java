@@ -2,6 +2,7 @@ package studentmgtworkspace.studentMgtSystem.dto;
 
 
 import studentmgtworkspace.studentMgtSystem.model.Course;
+import studentmgtworkspace.studentMgtSystem.model.Teacher;
 
 public class CourseDto {
     private String title;
@@ -53,7 +54,6 @@ public class CourseDto {
         return "CourseDto{" +
                 "title='" + title + '\'' +
                 ", courseCredit=" + courseCredit +
-                ", courseMaterialDto=" + courseMaterialDto +
                 '}';
     }
 }
