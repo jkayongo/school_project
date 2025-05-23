@@ -27,7 +27,9 @@ public class TeacherController {
             TeacherDto response = teacherService.saveTeacherAndTheirCourses(teacherDto);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch(Exception exception){
+            //log the error for developers to investigate.
             logger.error("Cannot save a teacher: {}", exception.getMessage(), exception);
+            //return a response back to the api caller(postman or frontend app)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
                     body("Cannot save a teacher " + exception.getMessage());
         }

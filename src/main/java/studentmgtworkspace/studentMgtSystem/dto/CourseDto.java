@@ -9,6 +9,7 @@ public class CourseDto {
     private Integer courseCredit;
     private CourseMaterialDto courseMaterialDto;
 
+
     public CourseDto() {
 
     }

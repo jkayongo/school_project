@@ -2,12 +2,15 @@ package studentmgtworkspace.studentMgtSystem.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity(name = "Student")
 @Table(name = "Students", uniqueConstraints = {@UniqueConstraint(name = "student_email_unique", columnNames = "email")})
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false)
+    @Column(name = "student_id", updatable = false)
     private Long id;
     @Column(name = "first_name", nullable = false, columnDefinition = "TEXT")
     private String firstName;
@@ -17,16 +20,22 @@ public class Student {
     private String email;
     @Embedded
     private Guardian guardian;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "student_course",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id"))
+    private List<Course> courses = new ArrayList<>();
 
     public Student() {
 
     }
 
-    public Student(String firstName, String lastName, String email, Guardian guardian) {
+    public Student(String firstName, String lastName, String email, Guardian guardian, List<Course> courses) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.guardian = guardian;
+        this.courses = courses;
     }
 
     public Long getId() {
@@ -69,6 +78,14 @@ public class Student {
         this.guardian = guardian;
     }
 
+    public List<Course> getCourses() {
+        return courses;
+    }
+
+    public void setCourses(List<Course> courses) {
+        this.courses = courses;
+    }
+
     @Override
     public String toString() {
         return "Student{" +
@@ -77,6 +94,7 @@ public class Student {
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", guardian=" + guardian +
+                ", courses=" + courses +
                 '}';
     }
 }

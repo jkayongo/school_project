@@ -2,8 +2,11 @@ package studentmgtworkspace.studentMgtSystem.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity(name = "Course")
-@Table(name = "courses")
+@Table(name = "courses_offered")
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,16 +21,19 @@ public class Course {
     @ManyToOne
     @JoinColumn(name = "teacher_id", referencedColumnName = "teacher_id")
     private Teacher teacher;
+    @ManyToMany(mappedBy = "courses")
+    private List<Student> students = new ArrayList<>();
 
     public Course() {
 
     }
 
-    public Course(String title, Integer courseCredit, CourseMaterial coursematerial, Teacher teacher) {
+    public Course(String title, Integer courseCredit, CourseMaterial coursematerial, Teacher teacher, List<Student> students) {
         this.title = title;
         this.courseCredit = courseCredit;
         this.coursematerial = coursematerial;
         this.teacher = teacher;
+        this.students = students;
     }
 
     public Long getCourseId() {
@@ -70,6 +76,14 @@ public class Course {
         this.teacher = teacher;
     }
 
+    public List<Student> getStudents() {
+        return students;
+    }
+
+    public void setStudents(List<Student> students) {
+        this.students = students;
+    }
+
     @Override
     public String toString() {
         return "Course{" +
@@ -78,6 +92,7 @@ public class Course {
                 ", courseCredit=" + courseCredit +
                 ", coursematerial=" + coursematerial +
                 ", teacher=" + teacher +
+                ", students=" + students +
                 '}';
     }
 }
