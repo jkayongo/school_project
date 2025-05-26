@@ -49,6 +49,8 @@ public class StudentService {
                 course = new Course();
                 course.setTitle(courseDto.getTitle());
                 course.setCourseCredit(courseDto.getCourseCredit());
+                //manually save new course.
+                course = courseDao.save(course);
             }
             //link a student to this course.This is the many to many part.
             course.getStudents().add(student);
@@ -79,5 +81,101 @@ public class StudentService {
         }
         studentResponse.setCourseDtos(courseDtos);
         return studentResponse;
+    }
+
+    @Transactional
+    public  List<StudentDto> getStudents(){
+         List<Student> students = studentDao.findAll();
+         List<StudentDto> schoolStudents = new ArrayList<>();
+         for(Student student : students){
+             StudentDto studentDto = new StudentDto();
+             studentDto.setFirstName(student.getFirstName());
+             studentDto.setLastName(student.getLastName());
+             studentDto.setEmail(student.getEmail());
+             GuardianDto guardainDto = new GuardianDto();
+             //set guardianDto
+             guardainDto.setName(student.getGuardian().getName());
+             guardainDto.setEmail(student.getGuardian().getEmail());
+             guardainDto.setMobile(student.getGuardian().getMobile());
+             studentDto.setGuardianDto(guardainDto);
+             //set courseDto
+             List<CourseDto> courseDtos = new ArrayList<>();
+             for(Course course : student.getCourses()){
+                 CourseDto courseDto = new CourseDto();
+                 courseDto.setTitle(course.getTitle());
+                 courseDto.setCourseCredit(course.getCourseCredit());
+                 courseDtos.add(courseDto);
+             }
+             studentDto.setCourseDtos(courseDtos);
+             schoolStudents.add(studentDto);
+         }
+         return schoolStudents;
+    }
+
+    @Transactional
+    public void updateStudentById(Long studentId, StudentDto studentDto){
+        Optional<Student> existingStudent = studentDao.findById(studentId);
+        Student student;
+        if(existingStudent.isPresent()){
+            student = existingStudent.get();
+            student.setFirstName(studentDto.getFirstName());
+            student.setLastName(studentDto.getLastName());
+            student.setEmail(studentDto.getEmail());
+            Guardian guardian = student.getGuardian();
+            if(guardian != null){
+                guardian.setName(studentDto.getGuardianDto().getName());
+                guardian.setEmail(studentDto.getGuardianDto().getEmail());
+                guardian.setMobile(studentDto.getGuardianDto().getMobile());
+            }else{
+                guardian = new Guardian();
+                guardian.setName(studentDto.getGuardianDto().getName());
+                guardian.setEmail(studentDto.getGuardianDto().getEmail());
+                guardian.setMobile(studentDto.getGuardianDto().getMobile());
+                student.setGuardian(guardian);
+            }
+            //unlink student from old courses.
+            for(Course oldCourse : student.getCourses()){
+                oldCourse.getStudents().remove(student);
+            }
+            //link to new set of courses.
+            List<Course> newCourses = new ArrayList<>();
+            for(CourseDto courseDto : studentDto.getCourseDtos()){
+                Optional<Course> foundCourse = courseDao.findByTitleAndCourseCredit(courseDto.getTitle(), courseDto.getCourseCredit());
+                Course course;
+                if(foundCourse.isPresent()){
+                    course = foundCourse.get();
+                }else{
+                    course = new Course();
+                    course.setTitle(courseDto.getTitle());
+                    course.setCourseCredit(courseDto.getCourseCredit());
+                    course = courseDao.save(course);
+                }
+                course.getStudents().add(student);
+                newCourses.add(course);
+            }
+            student.setCourses(newCourses);
+            studentDao.save(student);
+        }else{
+            throw new IllegalStateException("There is no student with id: " + studentId);
+        }
+    }
+    @Transactional
+    public void deleteStudent(Long id){
+        Optional<Student> existingStudent = studentDao.findById(id);
+        Student student;
+        if(existingStudent.isPresent()){
+            student = existingStudent.get();
+            if(student.getCourses() != null){
+                for(Course course : student.getCourses()){
+                    //remove the student from the course
+                    course.getStudents().remove(student);
+                }
+            }
+            //removes the relationship between the student and all their courses in the join table (student_course), not the actual Course records themselves.
+            student.getCourses().clear();
+            studentDao.delete(student);
+        }else{
+            throw new IllegalStateException("There is no student with id: " + id);
+        }
     }
 }
